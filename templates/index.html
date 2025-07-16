@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Download videos from YouTube, Instagram, etc."/>
+  <title>EverDownload</title>
+  <link rel="preload" href="https://unpkg.com/htmx.org@1.9.6" as="script">
+  <link rel="preload" href="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" as="script">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .htmx-indicator {
+      display: none;
+    }
+    .htmx-request .htmx-indicator {
+      display: flex !important;
+    }
+    .htmx-request.htmx-indicator {
+      display: flex !important;
+    }
+  </style>
+</head>
+<body class="bg-neutral-900 text-white min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold text-center mb-2">EverDownload - Download Videos</h2>
+    <p class="text-sm text-center text-gray-300 mb-6">Supports YouTube, Instagram, and more!</p>
+    <section class="flex flex-col md:flex-row items-center justify-center gap-8">
+
+      <div 
+        class="w-full md:w-1/2 relative h-64 md:h-80 rounded-lg shadow-lg overflow-hidden"
+        x-data="{ index: 0, images: ['/static/animate.png', '/static/animate2.png', '/static/animate3.png', '/static/animate4.png', '/static/animate5.png'] }"
+        x-init="setInterval(() => { index = (index + 1) % images.length }, 4000)"
+      >
+        <template x-for="(img, i) in images" :key="i">
+          <img 
+            :src="img" 
+            alt="Carousel Image" 
+            class="absolute inset-0 w-[44] h-full object-cover transition-transform duration-700 ease-in-out"
+            :class="{ 'translate-x-0': i === index, '-translate-x-full': i < index, 'translate-x-full': i > index }"
+          />
+        </template>
+      </div>
+
+
+      <div class="w-full md:w-1/2">
+        <form 
+          hx-post="/submit" 
+          hx-indicator="#loading-indicator"
+          hx-target="#result-container"
+          hx-swap="innerHTML"
+          class="flex flex-col gap-4"
+        >
+          <input
+            name="videoURL"
+            type="url"
+            placeholder="Paste video URL here..."
+            required
+            class="w-full text-black rounded p-3"
+          >
+          <button 
+            type="submit"
+            class="bg-neutral-800 text-white rounded p-3 hover:bg-neutral-700"
+          >
+            Download
+          </button>
+        </form>
+      </div>
+    </section>
+
+
+    <div id="result-container" class="mt-10 w-full max-w-2xl mx-auto"></div>
+  </div>
+
+  <div id="loading-indicator" 
+       class="htmx-indicator fixed inset-0 justify-center items-center bg-neutral-900 bg-opacity-80 z-50 hidden">
+    <div class="flex flex-col items-center">
+      <img src="/static/spinning-dots.svg" alt="Loading" class="w-32 h-32">
+      <p class="text-xl mt-4">Fetching Video Info...</p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+  <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js"></script>
+</body>
+</html>
