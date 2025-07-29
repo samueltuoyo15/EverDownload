@@ -29,7 +29,6 @@ type VideoResponse struct {
 	Author string `json:"author"`
 	Title string `json:"title"`
 	Thumbnail string `json:"thumbnail"`
-	Duration int `json:"duration"`
 	Medias []struct {
 		URL string `json:"url"`
 		Quality string `json:"quality"`
@@ -97,7 +96,6 @@ func main() {
 			<p class="text-white mb-2"><strong>Title:</strong> %s</p>
 			<p class="text-white mb-2"><strong>Source:</strong> %s</p>
 			<p class="text-white mb-2"><strong>Author:</strong> %s</p>
-			<p class="text-white mb-2"><strong>Duration:</strong> %d seconds</p>
 			<div class="mt-4">
 				<label for="qualitySelect" class="block mb-2">Select Quality</label>
 				<select id="qualitySelect" x-model="selectedUrl" class="w-full p-2 bg-neutral-800 text-white rounded-md border">`,
@@ -106,7 +104,6 @@ func main() {
 					videoData.Title,
 					videoData.Source,
 					videoData.Author,
-					videoData.Duration,
 			)
 
 		for _, media := range videoData.Medias {
@@ -140,12 +137,15 @@ func main() {
 		if fileName == "" {
 			fileName = "video.mp4"
 		}
+		req.Header.Set("User-Agent", "Mozilla/5.0")
+		req.Header.Set("Referer", videoURL)
 		resp, err := http.Get(url)
 		if err != nil {
 			http.Error(w, "Failed to fetch video", http.StatusInternalServerError)
 			return
 		}
 		defer resp.Body.Close()
+		
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 		w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
 		w.Header().Set("Content-Length", resp.Header.Get("Content-Length"))
