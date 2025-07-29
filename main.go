@@ -7,14 +7,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"errors"
+	"net/url"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
-
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
+	utils "EverDownload/utils"
 )
 
 type VideoRequest struct {
@@ -159,6 +161,16 @@ func main() {
 }
 
 func fetchVideoMetaData(videoURL, apiKey string) (*VideoResponse, error) {
+	parsedURL, err := url.ParseRequestURI(videoURL)
+	if err != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {
+		return nil, errors.New("invalid video URL")
+	}
+
+	host := strings.ToLower(parsedURL.Hostname())
+	if !utils.AllowedHosts[host] {
+		return nil, errors.New("Unsupported video source")
+	}
+
 	cacheKey := fmt.Sprintf("video_meta:%s", videoURL)
 	if cacheData, err := rdb.Get(ctx, cacheKey).Result(); err == nil {
 		var v VideoResponse
