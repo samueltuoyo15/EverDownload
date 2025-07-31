@@ -138,7 +138,7 @@ func main() {
 			fileName = "video.mp4"
 		}
 		r.Header.Set("User-Agent", "Mozilla/5.0")
-		r.Header.Set("Referer", videoURL)
+		r.Header.Set("Referer", url)
 		resp, err := http.Get(url)
 		if err != nil {
 			http.Error(w, "Failed to fetch video", http.StatusInternalServerError)
