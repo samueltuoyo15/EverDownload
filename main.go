@@ -1,40 +1,41 @@
 package main
 
 import (
+	utils "EverDownload/utils"
 	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"errors"
-	"net/url"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
+
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
-	utils "EverDownload/utils"
 )
 
 type VideoRequest struct {
 	URL string `json:"url"`
 }
 type VideoResponse struct {
-	URL string `json:"url"`
-	Source string `json:"source"`
-	ID string `json:"id"`
-	Author string `json:"author"`
-	Title string `json:"title"`
+	URL       string `json:"url"`
+	Source    string `json:"source"`
+	ID        string `json:"id"`
+	Author    string `json:"author"`
+	Title     string `json:"title"`
 	Thumbnail string `json:"thumbnail"`
-	Medias []struct {
-		URL string `json:"url"`
+	Medias    []struct {
+		URL     string `json:"url"`
 		Quality string `json:"quality"`
-		Width int `json:"width"`
-		Height int `json:"height"`
-		Ext string `json:"ext"`
+		Width   int    `json:"width"`
+		Height  int    `json:"height"`
+		Ext     string `json:"ext"`
 	} `json:"medias"`
 	Error bool `json:"error"`
 }
@@ -53,9 +54,9 @@ func main() {
 	}
 
 	rdb = redis.NewClient(&redis.Options{
-		Addr: os.Getenv("REDIS_URL"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB: 0,
+		Addr:      os.Getenv("REDIS_URL"),
+		Password:  os.Getenv("REDIS_PASSWORD"),
+		DB:        0,
 		TLSConfig: &tls.Config{},
 	})
 
@@ -99,12 +100,12 @@ func main() {
 			<div class="mt-4">
 				<label for="qualitySelect" class="block mb-2">Select Quality</label>
 				<select id="qualitySelect" x-model="selectedUrl" class="w-full p-2 bg-neutral-800 text-white rounded-md border">`,
-					videoData.Medias[0].URL,
-					videoData.Thumbnail,
-					videoData.Title,
-					videoData.Source,
-					videoData.Author,
-			)
+			videoData.Medias[0].URL,
+			videoData.Thumbnail,
+			videoData.Title,
+			videoData.Source,
+			videoData.Author,
+		)
 
 		for _, media := range videoData.Medias {
 			qualityLabel := strings.TrimSpace(media.Quality)
@@ -137,15 +138,14 @@ func main() {
 		if fileName == "" {
 			fileName = "video.mp4"
 		}
-		r.Header.Set("User-Agent", "Mozilla/5.0")
-		r.Header.Set("Referer", url)
+
 		resp, err := http.Get(url)
 		if err != nil {
 			http.Error(w, "Failed to fetch video", http.StatusInternalServerError)
 			return
 		}
 		defer resp.Body.Close()
-		
+
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 		w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
 		w.Header().Set("Content-Length", resp.Header.Get("Content-Length"))
@@ -198,7 +198,7 @@ func fetchVideoMetaData(videoURL, apiKey string) (*VideoResponse, error) {
 		return &result, nil
 	}
 	cachedData, _ := json.Marshal(result)
-	rdb.Set(ctx, cacheKey, cachedData, 8*time.Minute)
+	rdb.Set(ctx, cacheKey, cachedData, 5*time.Minute)
 	return &result, nil
 }
 

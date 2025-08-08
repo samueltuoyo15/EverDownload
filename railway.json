@@ -1,9 +1,0 @@
-{
-  "build": {
-    "command": "go build -o main .",
-    "watchDirs": ["."]
-  },
-  "start": {
-    "command": "./main"
-  }
-}
