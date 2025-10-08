@@ -1,20 +1,18 @@
 package main
 
 import (
-	utils "EverDownload/utils"
-	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
+
+	utils "EverDownload/utils"
 
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -23,6 +21,7 @@ import (
 type VideoRequest struct {
 	URL string `json:"url"`
 }
+
 type VideoResponse struct {
 	URL       string `json:"url"`
 	Source    string `json:"source"`
@@ -40,6 +39,20 @@ type VideoResponse struct {
 	Error bool `json:"error"`
 }
 
+type YTDLPOutput struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Uploader  string `json:"uploader"`
+	Thumbnail string `json:"thumbnail"`
+	Formats   []struct {
+		URL    string `json:"url"`
+		Ext    string `json:"ext"`
+		Format string `json:"format"`
+		Width  int    `json:"width"`
+		Height int    `json:"height"`
+	} `json:"formats"`
+}
+
 var ctx = context.Background()
 var rdb *redis.Client
 
@@ -48,16 +61,11 @@ func main() {
 		_ = godotenv.Load()
 	}
 
-	secretKey := os.Getenv("SECRET_KEY")
-	if secretKey == "" {
-		log.Fatal("SECRET_KEY environment variable not set")
-	}
-
 	rdb = redis.NewClient(&redis.Options{
 		Addr:      os.Getenv("REDIS_URL"),
 		Password:  os.Getenv("REDIS_PASSWORD"),
 		DB:        0,
-		TLSConfig: &tls.Config{},
+		TLSConfig: nil,
 	})
 
 	if _, err := rdb.Ping(ctx).Result(); err != nil {
@@ -77,12 +85,12 @@ func main() {
 		}
 
 		videoURL := r.FormValue("videoURL")
-		if videoURL == "" {
-			http.Error(w, "videoURL is required", http.StatusBadRequest)
+		if videoURL == "" || !utils.ValidateURL(videoURL) {
+			http.Error(w, "Invalid or unsupported video URL", http.StatusBadRequest)
 			return
 		}
 
-		videoData, err := fetchVideoMetaData(videoURL, secretKey)
+		videoData, err := fetchVideoMetaData(videoURL)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error fetching video meta data: %v", err), http.StatusInternalServerError)
 			return
@@ -95,7 +103,6 @@ func main() {
 			<h3 class="text-lg font-bold mb-4">Video Details</h3>
 			<img src="%s" alt="Video Thumbnail" class="w-full rounded-md mb-4" />
 			<p class="text-white mb-2"><strong>Title:</strong> %s</p>
-			<p class="text-white mb-2"><strong>Source:</strong> %s</p>
 			<p class="text-white mb-2"><strong>Author:</strong> %s</p>
 			<div class="mt-4">
 				<label for="qualitySelect" class="block mb-2">Select Quality</label>
@@ -103,7 +110,6 @@ func main() {
 			videoData.Medias[0].URL,
 			videoData.Thumbnail,
 			videoData.Title,
-			videoData.Source,
 			videoData.Author,
 		)
 
@@ -129,8 +135,8 @@ func main() {
 	})
 
 	http.HandleFunc("/download", func(w http.ResponseWriter, r *http.Request) {
-		url := r.URL.Query().Get("url")
-		if url == "" {
+		videoURL := r.URL.Query().Get("url")
+		if videoURL == "" {
 			http.Error(w, "URL parameter is required", http.StatusBadRequest)
 			return
 		}
@@ -139,17 +145,17 @@ func main() {
 			fileName = "video.mp4"
 		}
 
-		resp, err := http.Get(url)
-		if err != nil {
-			http.Error(w, "Failed to fetch video", http.StatusInternalServerError)
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
+		w.Header().Set("Content-Type", "video/mp4")
+
+		cmd := exec.Command("yt-dlp", "-f", "best", "-o", "-", videoURL)
+		cmd.Stdout = w
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			http.Error(w, "Failed to download video", http.StatusInternalServerError)
 			return
 		}
-		defer resp.Body.Close()
-
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
-		w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
-		w.Header().Set("Content-Length", resp.Header.Get("Content-Length"))
-		io.Copy(w, resp.Body)
 	})
 
 	port := os.Getenv("PORT")
@@ -160,15 +166,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func fetchVideoMetaData(videoURL, apiKey string) (*VideoResponse, error) {
+func fetchVideoMetaData(videoURL string) (*VideoResponse, error) {
 	parsedURL, err := url.ParseRequestURI(videoURL)
 	if err != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {
-		return nil, errors.New("invalid video URL")
-	}
-
-	host := strings.ToLower(parsedURL.Hostname())
-	if !utils.AllowedHosts[host] {
-		return nil, errors.New("Unsupported video source")
+		return nil, err
 	}
 
 	cacheKey := fmt.Sprintf("video_meta:%s", videoURL)
@@ -178,33 +179,43 @@ func fetchVideoMetaData(videoURL, apiKey string) (*VideoResponse, error) {
 			return &v, nil
 		}
 	}
-	payload := VideoRequest{URL: videoURL}
-	API_HOST := os.Getenv("HOST")
-	API_ENDPOINT := os.Getenv("API_ENDPOINT")
-	jsonPayload, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", API_ENDPOINT, bytes.NewBuffer(jsonPayload))
-	req.Header.Add("x-rapidapi-key", apiKey)
-	req.Header.Add("x-rapidapi-host", API_HOST)
-	req.Header.Add("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	cmd := exec.Command("yt-dlp", "-j", videoURL)
+	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
-	var result VideoResponse
-	if json.Unmarshal(body, &result) != nil || result.Error {
-		return &result, nil
-	}
-	cachedData, _ := json.Marshal(result)
-	rdb.Set(ctx, cacheKey, cachedData, 5*time.Minute)
-	return &result, nil
-}
 
-func getIP(r *http.Request) string {
-	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-		return strings.Split(forwarded, ",")[0]
+	var ytdlpData YTDLPOutput
+	if err := json.Unmarshal(output, &ytdlpData); err != nil {
+		return nil, err
 	}
-	return strings.Split(r.RemoteAddr, ":")[0]
+
+	videoResp := &VideoResponse{
+		URL:       videoURL,
+		ID:        ytdlpData.ID,
+		Author:    ytdlpData.Uploader,
+		Title:     ytdlpData.Title,
+		Thumbnail: ytdlpData.Thumbnail,
+	}
+
+	for _, f := range ytdlpData.Formats {
+		videoResp.Medias = append(videoResp.Medias, struct {
+			URL     string `json:"url"`
+			Quality string `json:"quality"`
+			Width   int    `json:"width"`
+			Height  int    `json:"height"`
+			Ext     string `json:"ext"`
+		}{
+			URL:     f.URL,
+			Quality: f.Format,
+			Width:   f.Width,
+			Height:  f.Height,
+			Ext:     f.Ext,
+		})
+	}
+
+	cacheData, _ := json.Marshal(videoResp)
+	rdb.Set(ctx, cacheKey, cacheData, 5*time.Minute)
+	return videoResp, nil
 }

@@ -1,40 +1,53 @@
-package utis 
+package utils
 
-var AllowedHosts = map[string]bool {
-	"youtube.com": true,
-	"www.youtube.com": true,
-	"youtu.be": true,
-	"twitter.com": true,
-	"www.twitter.com": true,
-	"x.com": true,
-	"www.x.com": true,
-	"facebook.com": true,
-	"www.facebook.com": true,
-	"fb.watch": true,
-	"instagram.com": true,
+import (
+	"net/url"
+)
+
+var AllowedHosts = map[string]bool{
+	"youtube.com":       true,
+	"www.youtube.com":   true,
+	"youtu.be":          true,
+	"twitter.com":       true,
+	"www.twitter.com":   true,
+	"x.com":             true,
+	"www.x.com":         true,
+	"facebook.com":      true,
+	"www.facebook.com":  true,
+	"fb.watch":          true,
+	"instagram.com":     true,
 	"www.instagram.com": true,
-	"tiktok.com": true,
-	"www.tiktok.com": true,
-	"linkedin.com": true,
-	"www.linkedin.com": true,
-	"snapchat.com": true,
-	"www.snapchat.com": true,
-	"pinterest.com": true,
+	"tiktok.com":        true,
+	"www.tiktok.com":    true,
+	"linkedin.com":      true,
+	"www.linkedin.com":  true,
+	"snapchat.com":      true,
+	"www.snapchat.com":  true,
+	"pinterest.com":     true,
 	"www.pinterest.com": true,
-	"vimeo.com": true,
-	"www.vimeo.com": true,
-	"twitch.tv": true,
-	"www.twitch.tv": true,
-	"threads.net": true,
-	"www.threads.net": true,
-	"reddit.com": true,
-	"www.reddit.com": true,
-	"discord.com": true,
-	"www.discord.com": true,
-	"bilibili.com": true,
-	"www.bilibili.com": true,
-	"rumble.com": true,
-	"www.rumble.com": true,
-	"kick.com": true,
-	"www.kick.com": true,
+	"vimeo.com":         true,
+	"www.vimeo.com":     true,
+	"twitch.tv":         true,
+	"www.twitch.tv":     true,
+	"threads.net":       true,
+	"www.threads.net":   true,
+	"reddit.com":        true,
+	"www.reddit.com":    true,
+	"discord.com":       true,
+	"www.discord.com":   true,
+	"bilibili.com":      true,
+	"www.bilibili.com":  true,
+	"rumble.com":        true,
+	"www.rumble.com":    true,
+	"kick.com":          true,
+	"www.kick.com":      true,
+}
+
+func ValidateURL(videoURL string) bool {
+	parsed, err := url.ParseRequestURI(videoURL)
+	if err != nil {
+		return false
+	}
+	_, ok := AllowedHosts[parsed.Host]
+	return ok
 }
