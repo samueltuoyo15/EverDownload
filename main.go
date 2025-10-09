@@ -50,6 +50,8 @@ type YTDLPOutput struct {
 		Format string `json:"format"`
 		Width  int    `json:"width"`
 		Height int    `json:"height"`
+		Acodec string `json:"acodec"`
+		Vcodec string `json:"vcodec"`
 	} `json:"formats"`
 }
 
@@ -61,11 +63,15 @@ func main() {
 		_ = godotenv.Load()
 	}
 
+	redisAddr := os.Getenv("REDIS_URL")
+	if redisAddr == "" {
+		redisAddr = "redis:6379"
+	}
+
 	rdb = redis.NewClient(&redis.Options{
-		Addr:      os.Getenv("REDIS_URL"),
-		Password:  os.Getenv("REDIS_PASSWORD"),
-		DB:        0,
-		TLSConfig: nil,
+		Addr:     redisAddr,
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,
 	})
 
 	if _, err := rdb.Ping(ctx).Result(); err != nil {
@@ -73,7 +79,6 @@ func main() {
 	}
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "templates/index.html")
 	})
@@ -148,7 +153,7 @@ func main() {
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 		w.Header().Set("Content-Type", "video/mp4")
 
-		cmd := exec.Command("yt-dlp", "-f", "best", "-o", "-", videoURL)
+		cmd := exec.Command("yt-dlp", "-f", "best[ext=mp4][acodec!=none]", "-o", "-", videoURL)
 		cmd.Stdout = w
 		cmd.Stderr = os.Stderr
 
@@ -160,7 +165,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "8080"
 	}
 	log.Printf("Server running on http://localhost:%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -200,19 +205,21 @@ func fetchVideoMetaData(videoURL string) (*VideoResponse, error) {
 	}
 
 	for _, f := range ytdlpData.Formats {
-		videoResp.Medias = append(videoResp.Medias, struct {
-			URL     string `json:"url"`
-			Quality string `json:"quality"`
-			Width   int    `json:"width"`
-			Height  int    `json:"height"`
-			Ext     string `json:"ext"`
-		}{
-			URL:     f.URL,
-			Quality: f.Format,
-			Width:   f.Width,
-			Height:  f.Height,
-			Ext:     f.Ext,
-		})
+		if f.URL != "" && (f.Ext == "mp4" || f.Ext == "m4a") && (f.Acodec != "none" || f.Vcodec != "none") {
+			videoResp.Medias = append(videoResp.Medias, struct {
+				URL     string `json:"url"`
+				Quality string `json:"quality"`
+				Width   int    `json:"width"`
+				Height  int    `json:"height"`
+				Ext     string `json:"ext"`
+			}{
+				URL:     f.URL,
+				Quality: f.Format,
+				Width:   f.Width,
+				Height:  f.Height,
+				Ext:     f.Ext,
+			})
+		}
 	}
 
 	cacheData, _ := json.Marshal(videoResp)
