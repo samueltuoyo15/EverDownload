@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 
@@ -30,33 +31,42 @@ type VideoResponse struct {
 	Title     string `json:"title"`
 	Thumbnail string `json:"thumbnail"`
 	Medias    []struct {
-		URL     string `json:"url"`
-		Quality string `json:"quality"`
-		Width   int    `json:"width"`
-		Height  int    `json:"height"`
-		Ext     string `json:"ext"`
+		FormatID string `json:"format_id"`
+		Quality  string `json:"quality"`
+		Width    int    `json:"width"`
+		Height   int    `json:"height"`
+		Ext      string `json:"ext"`
 	} `json:"medias"`
 	Error bool `json:"error"`
 }
 
 type YTDLPOutput struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	Uploader  string `json:"uploader"`
-	Thumbnail string `json:"thumbnail"`
-	Formats   []struct {
-		URL    string `json:"url"`
-		Ext    string `json:"ext"`
-		Format string `json:"format"`
-		Width  int    `json:"width"`
-		Height int    `json:"height"`
-		Acodec string `json:"acodec"`
-		Vcodec string `json:"vcodec"`
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	Uploader   string `json:"uploader"`
+	Thumbnail  string `json:"thumbnail"`
+	WebpageURL string `json:"webpage_url"`
+	Formats    []struct {
+		FormatID string `json:"format_id"`
+		Ext      string `json:"ext"`
+		Format   string `json:"format"`
+		Width    int    `json:"width"`
+		Height   int    `json:"height"`
+		Acodec   string `json:"acodec"`
+		Vcodec   string `json:"vcodec"`
+		FPS      int    `json:"fps"`
+		Filesize int64  `json:"filesize"`
 	} `json:"formats"`
 }
 
 var ctx = context.Background()
 var rdb *redis.Client
+
+var formatIDRegex = regexp.MustCompile(`^[a-zA-Z0-9+_-]+$`)
+
+func isValidFormatID(id string) bool {
+	return id != "" && formatIDRegex.MatchString(id)
+}
 
 func main() {
 	if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
@@ -104,33 +114,49 @@ func main() {
 		sanitizedTitle := strings.ReplaceAll(videoData.Title, "/", "-")
 
 		fmt.Fprintf(w, `
-			<div class="mt-6 mb-20 p-4 rounded-lg shadow-2xl" x-data="{ selectedUrl: '%s' }">
+			<div class="mt-6 mb-20 p-4 rounded-lg shadow-2xl" x-data="{ selectedFormat: '%s', pageUrl: '%s' }">
 			<h3 class="text-lg font-bold mb-4">Video Details</h3>
 			<img src="%s" alt="Video Thumbnail" class="w-full rounded-md mb-4" />
 			<p class="text-white mb-2"><strong>Title:</strong> %s</p>
 			<p class="text-white mb-2"><strong>Author:</strong> %s</p>
 			<div class="mt-4">
 				<label for="qualitySelect" class="block mb-2">Select Quality</label>
-				<select id="qualitySelect" x-model="selectedUrl" class="w-full p-2 bg-neutral-800 text-white rounded-md border">`,
-			videoData.Medias[0].URL,
+				<select id="qualitySelect" x-model="selectedFormat" class="w-full p-2 bg-neutral-800 text-white rounded-md border">`,
+			videoData.Medias[0].FormatID,
+			videoData.URL,
 			videoData.Thumbnail,
 			videoData.Title,
 			videoData.Author,
 		)
 
 		for _, media := range videoData.Medias {
-			qualityLabel := strings.TrimSpace(media.Quality)
-			if qualityLabel == "" {
-				qualityLabel = fmt.Sprintf("%dx%d %s", media.Width, media.Height, media.Ext)
+			label := media.Quality
+			if strings.Contains(label, "video only") || strings.Contains(label, "audio only") {
+				parts := strings.Split(label, " ")
+				res := ""
+				for _, p := range parts {
+					if strings.HasSuffix(p, "p") || strings.Contains(p, "x") {
+						res = p
+						break
+					}
+				}
+				if res == "" {
+					res = fmt.Sprintf("%dp", media.Height)
+				}
+				if strings.Contains(media.Quality, "audio only") {
+					label = "Audio only"
+				} else {
+					label = res
+				}
 			}
-			fmt.Fprintf(w, `<option value="%s">%s</option>`, media.URL, qualityLabel)
+			fmt.Fprintf(w, `<option value="%s">%s</option>`, media.FormatID, label)
 		}
 
 		fmt.Fprintf(w, `
 			</select>
 		</div>
 		<a 
-			x-bind:href="'/download?url=' + encodeURIComponent(selectedUrl) + '&filename=%s.mp4'" 
+			x-bind:href="'/download?url=' + encodeURIComponent(pageUrl) + '&filename=%s.mp4&format=' + encodeURIComponent(selectedFormat)" 
 			class="block mb-32 w-full mt-4 bg-red-900 text-center text-white p-3 rounded-md hover:bg-blue-600"
 			download
 		>
@@ -140,9 +166,14 @@ func main() {
 	})
 
 	http.HandleFunc("/download", func(w http.ResponseWriter, r *http.Request) {
-		videoURL := r.URL.Query().Get("url")
-		if videoURL == "" {
-			http.Error(w, "URL parameter is required", http.StatusBadRequest)
+		pageURL := r.URL.Query().Get("url")
+		if pageURL == "" {
+			http.Error(w, "Missing video page URL", http.StatusBadRequest)
+			return
+		}
+		formatID := r.URL.Query().Get("format")
+		if !isValidFormatID(formatID) {
+			http.Error(w, "Invalid format", http.StatusBadRequest)
 			return
 		}
 		fileName := r.URL.Query().Get("filename")
@@ -153,10 +184,17 @@ func main() {
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 		w.Header().Set("Content-Type", "video/mp4")
 
-		cmd := exec.Command("yt-dlp", "-f", "best[ext=mp4][acodec!=none]", "-o", "-", videoURL)
+		cmd := exec.Command(
+			"yt-dlp",
+			"-f", formatID,
+			"--merge-output-format", "mp4",
+			"--prefer-ffmpeg",
+			"--no-mtime",
+			"-o", "-",
+			pageURL,
+		)
 		cmd.Stdout = w
 		cmd.Stderr = os.Stderr
-
 		if err := cmd.Run(); err != nil {
 			http.Error(w, "Failed to download video", http.StatusInternalServerError)
 			return
@@ -197,7 +235,7 @@ func fetchVideoMetaData(videoURL string) (*VideoResponse, error) {
 	}
 
 	videoResp := &VideoResponse{
-		URL:       videoURL,
+		URL:       ytdlpData.WebpageURL,
 		ID:        ytdlpData.ID,
 		Author:    ytdlpData.Uploader,
 		Title:     ytdlpData.Title,
@@ -205,21 +243,25 @@ func fetchVideoMetaData(videoURL string) (*VideoResponse, error) {
 	}
 
 	for _, f := range ytdlpData.Formats {
-		if f.URL != "" && (f.Ext == "mp4" || f.Ext == "m4a") && (f.Acodec != "none" || f.Vcodec != "none") {
-			videoResp.Medias = append(videoResp.Medias, struct {
-				URL     string `json:"url"`
-				Quality string `json:"quality"`
-				Width   int    `json:"width"`
-				Height  int    `json:"height"`
-				Ext     string `json:"ext"`
-			}{
-				URL:     f.URL,
-				Quality: f.Format,
-				Width:   f.Width,
-				Height:  f.Height,
-				Ext:     f.Ext,
-			})
+		if f.FormatID == "" {
+			continue
 		}
+		if f.Vcodec == "none" && f.Acodec == "none" {
+			continue
+		}
+		videoResp.Medias = append(videoResp.Medias, struct {
+			FormatID string `json:"format_id"`
+			Quality  string `json:"quality"`
+			Width    int    `json:"width"`
+			Height   int    `json:"height"`
+			Ext      string `json:"ext"`
+		}{
+			FormatID: f.FormatID,
+			Quality:  f.Format,
+			Width:    f.Width,
+			Height:   f.Height,
+			Ext:      f.Ext,
+		})
 	}
 
 	cacheData, _ := json.Marshal(videoResp)
