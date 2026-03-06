@@ -1,6 +1,6 @@
-# EverDownload — Universal Video Downloader
+# EverDownload: Universal Video Downloader
 
-EverDownload is a Go web app that downloads videos from 1000+ platforms using `yt-dlp` and `ffmpeg`. Metadata is Redis-cached for fast repeat lookups. No external APIs.
+EverDownload is a Go web app that downloads videos from 1000+ platforms using yt-dlp and ffmpeg. Metadata is Redis-cached for fast repeat lookups. No external APIs.
 
 <img src="/public/demo.png" alt="EverDownload Demo">
 
@@ -44,16 +44,17 @@ go run ./cmd/server/
 ## Project Structure
 
 ```
-cmd/server/main.go          — entry point
+cmd/server/main.go          entry point
 internal/
-  formats/formats.go        — format parsing and labeling
-  cache/cache.go            — Redis wrapper
-  ytdlp/ytdlp.go            — yt-dlp process runner
+  formats/formats.go        format parsing and labeling
+  cache/cache.go            Redis wrapper
+  ytdlp/ytdlp.go            yt-dlp process runner
   handlers/
-    info.go                 — POST /api/info
-    download.go             — GET /download
-utils/allowed.hosts.go      — URL allowlist
-templates/index.html        — frontend
+    info.go                 POST /api/info
+    download.go             GET /download
+utils/allowed.hosts.go      URL allowlist
+templates/index.html        frontend
+static/style.css            styles
 ```
 
 ## Contributing
