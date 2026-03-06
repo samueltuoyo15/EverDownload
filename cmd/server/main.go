@@ -40,8 +40,8 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "5000"
 	}
-	log.Printf("EverDownload running on http://localhost:%s", port)
+	log.Printf("EverDownload running on port:%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }

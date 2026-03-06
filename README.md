@@ -39,7 +39,7 @@ go run ./cmd/server/
 | Variable | Default | Description |
 |---|---|---|
 | `REDIS_URL` | `redis://localhost:6379` | Redis connection URL |
-| `PORT` | `8080` | Server port |
+| `PORT` | `5000` | Server port |
 
 ## Project Structure
 
