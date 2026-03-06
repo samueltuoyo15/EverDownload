@@ -6,11 +6,11 @@ EverDownload is a Go web app that downloads videos from 1000+ platforms using yt
 
 ## Stack
 
-- **Go** — concurrent backend
-- **yt-dlp + ffmpeg** — video extraction and format merging
-- **Redis** — metadata caching (10 min TTL)
-- **Docker + Docker Compose** — containerised deployment
-- **Vanilla JS** — frontend (no framework)
+- **Go**: concurrent backend
+- **yt-dlp + ffmpeg**: video extraction and format merging
+- **Redis**: metadata caching (10 min TTL)
+- **Docker + Docker Compose**: containerised deployment
+- **Vanilla JS**: frontend (no framework)
 
 ## Supported Platforms
 
@@ -66,7 +66,7 @@ static/style.css            styles
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT: see [LICENSE](LICENSE).
 
 ## Author
 
