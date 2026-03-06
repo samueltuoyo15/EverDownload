@@ -17,6 +17,8 @@
 <body>
 
     <div class="decorations" aria-hidden="true">
+        <img src="/static/block.svg" class="decor-block-left" alt="" />
+        <img src="/static/block.svg" class="decor-block-right" alt="" />
         <img src="/static/animate.png" class="decor decor-1" alt="" />
         <img src="/static/animate2.png" class="decor decor-2" alt="" />
         <img src="/static/animate3.png" class="decor decor-3" alt="" />
@@ -25,30 +27,13 @@
     </div>
 
     <header class="hero">
-        <div class="hero-badge">
-            <span class="dot"></span>
-            1000+ Supported Sites
-        </div>
         <h1>Download Any Video,<br />Anywhere.</h1>
         <p>Paste a link from YouTube, TikTok, Instagram, Twitter, Reddit, Twitch, Vimeo and more, download in seconds.
         </p>
-
         <div class="input-wrap">
             <input id="urlInput" type="url" placeholder="Paste a video URL here..." autocomplete="off"
                 spellcheck="false" />
             <button class="btn-primary" id="fetchBtn" onclick="fetchInfo()">Get Formats</button>
-        </div>
-
-        <div class="sites">
-            <span><span class="dot"></span>YouTube</span>
-            <span><span class="dot"></span>TikTok</span>
-            <span><span class="dot"></span>Instagram</span>
-            <span><span class="dot"></span>Twitter / X</span>
-            <span><span class="dot"></span>Reddit</span>
-            <span><span class="dot"></span>Twitch</span>
-            <span><span class="dot"></span>Vimeo</span>
-            <span><span class="dot"></span>Facebook</span>
-            <span><span class="dot"></span>and 1000+ more</span>
         </div>
     </header>
 
@@ -86,6 +71,84 @@
                     </a>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="credit">
+        Built by <span>Samuel Tuoyo</span>
+    </div>
+
+    <div class="marquee-wrapper">
+        <div class="marquee-track">
+            <!-- First Set -->
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z">
+                    </path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                </svg><span>YouTube</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                </svg><span>TikTok</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg><span>Instagram</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg><span>Twitter / X</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M22 11.52A3.5 3.5 0 1 0 16 9.61c-1.1-.64-2.4-.99-3.76-1.01l.9-4.25 3.01.62A2.75 2.75 0 1 0 19 2.52c0-.52-.16-1.01-.43-1.42l-3.59-.75a.5.5 0 0 0-.58.38l-.92 4.3c-1.37.01-2.67.36-3.76 1A3.5 3.5 0 1 0 2 11.52c0 .92.35 1.76.92 2.39-4.14 2-4.14 6.12 0 8.12a10.97 10.97 0 0 0 9.08 0c4.14-2 4.14-6.12 0-8.12.57-.63.92-1.47.92-2.39zM12 20.25c-3.1 0-5.6-2.01-5.6-4.49S8.9 11.25 12 11.25s5.6 2.01 5.6 4.49-2.5 6.51-5.6 6.51zm-3-5.24a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-3 2.51c1.55 0 2.92-.81 3.53-2.02l1.1.53c-.76 1.48-2.4 2.49-4.13 2.49s-3.37-1.01-4.13-2.49l1.1-.53c.61 1.21 1.98 2.02 3.53 2.02z" />
+                </svg><span>Reddit</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"></path>
+                </svg><span>Twitch</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg><span>Facebook</span></div>
+
+            <!-- Second Set (Duplicate for pure loop) -->
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z">
+                    </path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                </svg><span>YouTube</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                </svg><span>TikTok</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg><span>Instagram</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg><span>Twitter / X</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M22 11.52A3.5 3.5 0 1 0 16 9.61c-1.1-.64-2.4-.99-3.76-1.01l.9-4.25 3.01.62A2.75 2.75 0 1 0 19 2.52c0-.52-.16-1.01-.43-1.42l-3.59-.75a.5.5 0 0 0-.58.38l-.92 4.3c-1.37.01-2.67.36-3.76 1A3.5 3.5 0 1 0 2 11.52c0 .92.35 1.76.92 2.39-4.14 2-4.14 6.12 0 8.12a10.97 10.97 0 0 0 9.08 0c4.14-2 4.14-6.12 0-8.12.57-.63.92-1.47.92-2.39zM12 20.25c-3.1 0-5.6-2.01-5.6-4.49S8.9 11.25 12 11.25s5.6 2.01 5.6 4.49-2.5 6.51-5.6 6.51zm-3-5.24a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-3 2.51c1.55 0 2.92-.81 3.53-2.02l1.1.53c-.76 1.48-2.4 2.49-4.13 2.49s-3.37-1.01-4.13-2.49l1.1-.53c.61 1.21 1.98 2.02 3.53 2.02z" />
+                </svg><span>Reddit</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"></path>
+                </svg><span>Twitch</span></div>
+            <div class="marquee-item"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor"
+                    stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg><span>Facebook</span></div>
         </div>
     </div>
 
