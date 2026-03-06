@@ -89,7 +89,10 @@ body {
   z-index: 5;
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.7));
   will-change: transform, opacity;
-  animation: 16s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation-fill-mode: forwards;
+  opacity: 0;
 }
 
 .decor-1 {
@@ -97,27 +100,12 @@ body {
   left: 2%;
   max-width: 180px;
   animation-name: popDecor1;
+  animation-delay: 0.1s;
 }
 
 @keyframes popDecor1 {
-
-  0%,
-  4% {
-    transform: translate(-300px, 300px) rotate(-30deg) scale(0.6);
-    opacity: 0;
-  }
-
-  10%,
-  82% {
-    transform: translate(0, 0) rotate(8deg) scale(1);
-    opacity: 1;
-  }
-
-  88%,
-  100% {
-    transform: translate(-300px, 300px) rotate(-30deg) scale(0.6);
-    opacity: 0;
-  }
+  0% { transform: translate(-300px, 300px) rotate(-30deg) scale(0.6); opacity: 0; }
+  100% { transform: translate(0, 0) rotate(8deg) scale(1); opacity: 1; }
 }
 
 .decor-2 {
@@ -125,27 +113,12 @@ body {
   right: 1%;
   max-width: 220px;
   animation-name: popDecor2;
+  animation-delay: 0.3s;
 }
 
 @keyframes popDecor2 {
-
-  0%,
-  8% {
-    transform: translate(300px, -300px) rotate(45deg) scale(0.6);
-    opacity: 0;
-  }
-
-  14%,
-  82% {
-    transform: translate(0, 0) rotate(-6deg) scale(1.05);
-    opacity: 1;
-  }
-
-  88%,
-  100% {
-    transform: translate(300px, -300px) rotate(45deg) scale(0.6);
-    opacity: 0;
-  }
+  0% { transform: translate(300px, -300px) rotate(45deg) scale(0.6); opacity: 0; }
+  100% { transform: translate(0, 0) rotate(-6deg) scale(1.05); opacity: 1; }
 }
 
 .decor-3 {
@@ -153,27 +126,12 @@ body {
   left: -25px;
   max-width: 160px;
   animation-name: popDecor3;
+  animation-delay: 0.5s;
 }
 
 @keyframes popDecor3 {
-
-  0%,
-  12% {
-    transform: translate(-300px, 0) rotate(-45deg) scale(0.5);
-    opacity: 0;
-  }
-
-  18%,
-  82% {
-    transform: translate(0, 0) rotate(14deg) scale(1.1);
-    opacity: 1;
-  }
-
-  88%,
-  100% {
-    transform: translate(-300px, 0) rotate(-45deg) scale(0.5);
-    opacity: 0;
-  }
+  0% { transform: translate(-300px, 0) rotate(-45deg) scale(0.5); opacity: 0; }
+  100% { transform: translate(0, 0) rotate(14deg) scale(1.1); opacity: 1; }
 }
 
 .decor-4 {
@@ -181,27 +139,12 @@ body {
   right: 4%;
   max-width: 240px;
   animation-name: popDecor4;
+  animation-delay: 0.7s;
 }
 
 @keyframes popDecor4 {
-
-  0%,
-  16% {
-    transform: translate(300px, 300px) rotate(25deg) scale(0.6);
-    opacity: 0;
-  }
-
-  22%,
-  82% {
-    transform: translate(0, 0) rotate(-3deg) scale(0.95);
-    opacity: 1;
-  }
-
-  88%,
-  100% {
-    transform: translate(300px, 300px) rotate(25deg) scale(0.6);
-    opacity: 0;
-  }
+  0% { transform: translate(300px, 300px) rotate(25deg) scale(0.6); opacity: 0; }
+  100% { transform: translate(0, 0) rotate(-3deg) scale(0.95); opacity: 1; }
 }
 
 .decor-5 {
@@ -209,27 +152,12 @@ body {
   left: 8%;
   max-width: 150px;
   animation-name: popDecor5;
+  animation-delay: 0.9s;
 }
 
 @keyframes popDecor5 {
-
-  0%,
-  20% {
-    transform: translate(-200px, -300px) rotate(-25deg) scale(0.5);
-    opacity: 0;
-  }
-
-  26%,
-  82% {
-    transform: translate(0, 0) rotate(-18deg) scale(1);
-    opacity: 1;
-  }
-
-  88%,
-  100% {
-    transform: translate(-200px, -300px) rotate(-25deg) scale(0.5);
-    opacity: 0;
-  }
+  0% { transform: translate(-200px, -300px) rotate(-25deg) scale(0.5); opacity: 0; }
+  100% { transform: translate(0, 0) rotate(-18deg) scale(1); opacity: 1; }
 }
 
 @media (max-width: 1100px) {
@@ -435,13 +363,15 @@ body {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   backdrop-filter: blur(10px);
-  border-radius: var(--radius);
-  padding: 20px 24px;
+  border-radius: 12px;
+  padding: 12px 16px;
   color: #fca5a5;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  margin-top: 36px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  margin: 36px auto 0;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 #state-result {
