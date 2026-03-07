@@ -42,7 +42,7 @@ func (h *Handler) VideoInfo(w http.ResponseWriter, r *http.Request) {
 
 	raw, err := ytdlp.FetchInfo(ctx, req.URL)
 	if err != nil {
-		http.Error(w, "failed to fetch video info — check the URL and try again", http.StatusBadGateway)
+		http.Error(w, "failed to fetch video info, check the URL and try again", http.StatusBadGateway)
 		return
 	}
 

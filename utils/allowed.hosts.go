@@ -17,6 +17,7 @@ var AllowedHosts = map[string]bool{
 	"fb.watch":          true,
 	"instagram.com":     true,
 	"www.instagram.com": true,
+	"vm.tiktok.com":     true,
 	"tiktok.com":        true,
 	"www.tiktok.com":    true,
 	"linkedin.com":      true,
