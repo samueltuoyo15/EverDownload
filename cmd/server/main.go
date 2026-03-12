@@ -4,6 +4,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
+	"strconv"
+	"time"
 
 	"EverDownload/internal/cache"
 	"EverDownload/internal/handlers"
@@ -12,6 +15,9 @@ import (
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	log.Printf("EverDownload starting on %d CPU cores", runtime.NumCPU())
+
 	if os.Getenv("RAILWAY_ENVIRONMENT") == "" && os.Getenv("DOCKER_ENV") == "" {
 		_ = godotenv.Load()
 	}
@@ -34,7 +40,6 @@ func main() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "templates/index.html")
 	})
-
 	mux.HandleFunc("/api/info", h.VideoInfo)
 	mux.HandleFunc("/download", h.Download)
 
@@ -42,6 +47,15 @@ func main() {
 	if port == "" {
 		port = "5000"
 	}
-	log.Printf("EverDownload running on port:%s", port)
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: 30 * time.Second,
+		WriteTimeout:      0,
+		IdleTimeout:       120 * time.Second,
+	}
+
+	log.Printf("EverDownload listening on :%s (GOMAXPROCS=%s)", port, strconv.Itoa(runtime.GOMAXPROCS(0)))
+	log.Fatal(srv.ListenAndServe())
 }

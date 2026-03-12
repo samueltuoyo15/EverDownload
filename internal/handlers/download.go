@@ -39,7 +39,7 @@ func (h *Handler) Download(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Cache-Control", "no-store")
 
-	if err := ytdlp.Stream(ctx, videoURL, formatID, w); err != nil {
-		return
+	if _, err := ytdlp.StreamWithInfo(ctx, videoURL, formatID, w); err != nil {
+		fmt.Printf("[download] error: %v\n", err)
 	}
 }
