@@ -1,0 +1,4 @@
+templates/* linguist-documentation
+static/*.css linguist-vendored
+static/*.svg linguist-vendored
+static/*.png linguist-vendored
