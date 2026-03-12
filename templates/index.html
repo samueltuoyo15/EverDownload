@@ -48,7 +48,9 @@
         <div id="state-result">
             <div class="video-card">
                 <div class="thumb-wrap">
-                    <img id="thumb" src="" alt="Video thumbnail" />
+                    <img id="thumb" src="" alt="Video thumbnail" style="display:block" />
+                    <video id="thumb-video" src="" autoplay muted loop playsinline
+                        style="display:none;width:100%;height:100%;object-fit:cover;border-radius:inherit"></video>
                     <span class="source-badge" id="source-badge"></span>
                 </div>
 
@@ -216,7 +218,26 @@
         }
 
         function renderResult(info, originalURL) {
-            document.getElementById('thumb').src = info.thumbnail || '';
+            const thumbImg = document.getElementById('thumb');
+            const thumbVid = document.getElementById('thumb-video');
+
+            thumbImg.style.display = 'block';
+            thumbVid.style.display = 'none';
+            thumbVid.src = '';
+
+            if (info.thumbnail) {
+                thumbImg.src = info.thumbnail;
+                thumbImg.onerror = () => {
+                    thumbImg.style.display = 'none';
+                    thumbVid.src = info.url || originalURL;
+                    thumbVid.style.display = 'block';
+                };
+            } else {
+                thumbImg.style.display = 'none';
+                thumbVid.src = info.url || originalURL;
+                thumbVid.style.display = 'block';
+            }
+
             document.getElementById('video-title').textContent = info.title || 'Untitled';
             document.getElementById('video-author').textContent = info.author ? 'by ' + info.author : '';
 

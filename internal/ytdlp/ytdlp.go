@@ -23,6 +23,8 @@ func concurrentFragments() string {
 	return strconv.Itoa(n)
 }
 
+const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+
 var dlCounter atomic.Int64
 
 func FetchInfo(ctx context.Context, videoURL string) ([]byte, error) {
@@ -31,6 +33,9 @@ func FetchInfo(ctx context.Context, videoURL string) ([]byte, error) {
 		"--no-playlist",
 		"--skip-download",
 		"--no-warnings",
+		"--user-agent", userAgent,
+		"--add-headers", "Accept-Language:en-US,en;q=0.9",
+		"--no-check-certificates",
 		videoURL,
 	)
 	return cmd.Output()
@@ -49,6 +54,9 @@ func Stream(ctx context.Context, videoURL, formatID string, w io.Writer) error {
 		"--no-mtime",
 		"--no-part",
 		"--no-warnings",
+		"--user-agent", userAgent,
+		"--add-headers", "Accept-Language:en-US,en;q=0.9",
+		"--no-check-certificates",
 		"--retries", "3",
 		"--fragment-retries", "3",
 		"--buffer-size", "16K",
@@ -86,6 +94,9 @@ func StreamWithInfo(ctx context.Context, videoURL, formatID string, w io.Writer)
 		"--no-mtime",
 		"--no-part",
 		"--no-warnings",
+		"--user-agent", userAgent,
+		"--add-headers", "Accept-Language:en-US,en;q=0.9",
+		"--no-check-certificates",
 		"--retries", "3",
 		"--fragment-retries", "3",
 		"--buffer-size", "16K",
